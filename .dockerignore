@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+.git
+.env
+.env.*
+!.env.example
+data
+*.sqlite*
+*.session*
+coverage
+tests
+
+.playwright-mcp

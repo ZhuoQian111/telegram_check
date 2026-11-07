@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: .env
+    environment:
+      DATABASE_PATH: /data/app.sqlite
+      HOST: 0.0.0.0
+      PORT: 3000
+    volumes:
+      - telegram_data:/data
+    restart: unless-stopped
+    stop_grace_period: 60s
+volumes:
+  telegram_data:
