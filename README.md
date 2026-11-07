@@ -15,7 +15,7 @@ cp .env.example .env
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 ```
 
-将生成结果填入 `.env` 的 `SESSION_ENCRYPTION_KEY`。设置至少 16 字符的 `ADMIN_PASSWORD`，填写 `TELEGRAM_API_ID`、`TELEGRAM_API_HASH`，`APP_ORIGIN=http://localhost:3000`。密钥只保存在本地及部署平台的 Secrets 中。
+将生成结果填入 `.env` 的 `SESSION_ENCRYPTION_KEY`。设置至少 10 字符的 `ADMIN_PASSWORD`，填写 `TELEGRAM_API_ID`、`TELEGRAM_API_HASH`。本地通过 `http://localhost:3000` 访问时，`APP_ORIGIN` 可以留空；使用其他地址或端口时填写对应地址。密钥只保存在本地及部署平台的 Secrets 中。
 
 ```sh
 nvm use # 如使用 nvm，可读取项目 .nvmrc
@@ -43,13 +43,15 @@ Compose 只监听本机 3000，数据使用命名卷 `telegram_data`。`docker c
 
 | 环境变量 | 说明 |
 | --- | --- |
-| ADMIN_PASSWORD | 至少 16 字符的管理员密码 |
+| ADMIN_PASSWORD | 至少 10 字符的管理员密码，10 字符及以上均可 |
 | SESSION_ENCRYPTION_KEY | 32 字节随机密钥的 Base64，首次生成后保持不变 |
 | TELEGRAM_API_ID | Telegram 应用 API ID |
 | TELEGRAM_API_HASH | Telegram 应用 API Hash |
-| APP_ORIGIN | 平台提供的网站 HTTPS Origin，例如 `https://example.instacloud.app`，不要带路径 |
+| APP_ORIGIN | 首次部署可留空；取得网址后填写实际 HTTPS Origin，例如 `https://example.instacloud.app`，不要带路径 |
 | DATABASE_PATH | `/data/app.sqlite` |
 | SCHEDULER_ENABLED | 仅正式服务设置 `true` |
+
+`APP_ORIGIN` 用于检查登录、创建任务等写入请求的来源，防止其他网站代发操作，并决定登录 Cookie 是否启用 HTTPS 的 Secure 属性。它不是启动时的必填项：未填写时默认为 `http://localhost:3000`。首次创建服务还没有公网域名时，可以先留空部署；取得平台分配的网址后，再更新该服务的 `APP_ORIGIN` 并重启，然后从该网址登录。不需要事先购买或绑定自定义域名。若从与此配置不同的地址登录或保存任务，会收到 `Origin rejected`。
 
 5. 如果需要修复挂载卷权限，在平台 Console 执行 `chown node:node /data && chmod 700 /data`。镜像以 node 用户运行；先确认平台服务实际运行用户及卷所有者。
 6. `/api/health` 可供健康检查；管理员登录后页面显示调度开关状态。完成一次收藏夹测试，再建正式每日任务。
